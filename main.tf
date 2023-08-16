@@ -1,10 +1,7 @@
 
 locals {
   vcn_id = var.existing_vcn_ocid == "" ? oci_core_virtual_network.mysqlvcn[0].id : var.existing_vcn_ocid
-  nat_gatway_id = var.existing_nat_gateway_ocid == "" ? oci_core_nat_gateway.nat_gateway[0].id : var.existing_nat_gateway_ocid
-  private_route_table_id = var.existing_private_route_table_ocid == "" ? oci_core_route_table.private_route_table[0].id : var.existing_private_route_table_ocid
   private_subnet_id = var.existing_private_subnet_ocid == "" ? oci_core_subnet.private[0].id : var.existing_private_subnet_ocid
-  private_security_list_id = var.existing_private_security_list_ocid == "" ? oci_core_security_list.private_security_list[0].id : var.existing_private_security_list_ocid
 }
 
 #data "oci_identity_availability_domains" "ad" {
@@ -37,8 +34,6 @@ resource "oci_core_nat_gateway" "nat_gateway" {
   compartment_id = var.compartment_ocid
   vcn_id = local.vcn_id
   display_name   = "nat_gateway"
-
-  count = var.existing_nat_gateway_ocid == "" ? 1 : 0
 }
 
 
@@ -50,8 +45,6 @@ resource "oci_core_route_table" "private_route_table" {
     destination       = "0.0.0.0/0"
     network_entity_id = local.nat_gatway_id
   }
-
-  count = var.existing_private_route_table_ocid == "" ? 1 : 0
 }
 
 resource "oci_core_security_list" "private_security_list" {
@@ -83,8 +76,6 @@ resource "oci_core_security_list" "private_security_list" {
     protocol = "6"
     source   = var.vcn_cidr
   }
-
-  count = var.existing_private_security_list_ocid == "" ? 1 : 0
 }
 
 resource "oci_core_subnet" "private" {
@@ -111,7 +102,6 @@ module "mds-instance" {
   compartment_ocid = var.compartment_ocid
   subnet_id = local.private_subnet_id
   display_name = var.mds_instance_name
-  existing_mds_instance_id  = var.existing_mds_instance_ocid
   deploy_ha = var.deploy_mds_ha
   mysql_shape = var.mysql_shape
 }
