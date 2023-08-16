@@ -18,7 +18,7 @@ variable "region" {
 
 variable "vcn" {
   description = "VCN Name"
-  default     = "mysql_mds_vcn"
+  default     = "mysql-mds-vcn"
 }
 
 variable "vcn_cidr" {
