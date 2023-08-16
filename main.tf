@@ -4,9 +4,9 @@ locals {
   private_subnet_id = var.existing_private_subnet_ocid == "" ? oci_core_subnet.private[0].id : var.existing_private_subnet_ocid
 }
 
-#data "oci_identity_availability_domains" "ad" {
-#  compartment_id = var.tenancy_ocid
-#}
+data "oci_identity_availability_domains" "ad" {
+  compartment_id = var.tenancy_ocid
+}
 
 data "template_file" "ad_names" {
   count    = length(data.oci_identity_availability_domains.ad.availability_domains)
