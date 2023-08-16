@@ -16,17 +16,6 @@ variable "region" {
   description = "OCI Region"
 }
 
-variable "existing_vcn_ocid" {
-  description = "OCID of an existing VCN to use"
-  default     = ""
-}
-
-variable "existing_private_subnet_ocid" {
-  description = "OCID of an existing private subnet to use"
-  default     = ""
-}
-
-
 variable "vcn" {
   description = "VCN Name"
   default     = "mysql_vcn"
