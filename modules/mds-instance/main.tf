@@ -39,9 +39,3 @@ resource "oci_mysql_mysql_configuration" "mds_mysql_configuration" {
 	}
 }
 
-
-data "oci_mysql_mysql_db_system" "MDSinstance_to_use" {
-    db_system_id =  local.db_system_id
-}
-
-
