@@ -41,8 +41,8 @@ resource "oci_mysql_mysql_configuration" "mds_mysql_configuration" {
 	variables {
 
 		#Optional
-		max_connections = "501"
-        binlog_expire_logs_seconds = "7200"
+		#max_connections = "501"
+                binlog_expire_logs_seconds = "86400"
 	}
 }
 
@@ -51,12 +51,4 @@ data "oci_mysql_mysql_db_system" "MDSinstance_to_use" {
     db_system_id =  local.db_system_id
 }
 
-resource "oci_mysql_heat_wave_cluster" "test_heat_wave_cluster" {
-    #Required
-    db_system_id  = local.db_system_id
-    cluster_size  = var.heatwave_cluster_size 
-    shape_name    = var.heatwave_cluster_shape
-
-    count = var.deploy_heatwave ? 1 : 0
-}
 
