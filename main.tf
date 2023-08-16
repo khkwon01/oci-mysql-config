@@ -18,7 +18,7 @@ resource oci_core_vcn mds-vcn {
   compartment_id = var.compartment_ocid
   defined_tags = {
   }
-  display_name = "mds-vcn"
+  display_name = var.vcn
   dns_label    = "ocidevcluster"
   freeform_tags = {
   }
