@@ -76,7 +76,6 @@ variable "existing_mds_instance_ocid" {
   default     = ""
 }
 
-
 variable "vcn" {
   description = "VCN Name"
   default     = "mysql_vcn"
@@ -95,26 +94,6 @@ variable "fingerprint" {
 variable "dns_label" {
   description = "Allows assignment of DNS hostname when launching an Instance. "
   default     = ""
-}
-
-variable "node_image_id" {
-  description = "The OCID of an image for a node instance to use. "
-  default     = ""
-}
-
-variable "node_shape" {
-  description = "Instance shape to use for master instance. "
-  default     = "VM.Standard.E2.1"
-}
-
-variable "node_flex_shape_ocpus" {
-  description = "Flex Instance shape OCPUs"
-  default = 1
-}
-
-variable "node_flex_shape_memory" {
-  description = "Flex Instance shape Memory (GB)"
-  default = 6
 }
 
 variable "label_prefix" {
