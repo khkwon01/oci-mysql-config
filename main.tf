@@ -44,6 +44,7 @@ resource "oci_core_route_table" "private_route_table" {
   route_rules {
     destination       = "0.0.0.0/0"
   }
+  network_entity_id = 
 }
 
 resource "oci_core_security_list" "private_security_list" {
