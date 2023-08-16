@@ -43,7 +43,6 @@ resource "oci_core_route_table" "private_route_table" {
   display_name   = "RouteTableForMySQLPrivate"
   route_rules {
     destination       = "0.0.0.0/0"
-    network_entity_id = local.nat_gatway_id
   }
 }
 
@@ -83,8 +82,6 @@ resource "oci_core_subnet" "private" {
   display_name               = "mysql_private_subnet"
   compartment_id             = var.compartment_ocid
   vcn_id                     = local.vcn_id
-  route_table_id             = local.private_route_table_id
-  security_list_ids          = [local.private_security_list_id]
   #dhcp_options_id = var.use_existing_vcn_ocid ? var.existing_vcn_ocid.default_dhcp_options_id : oci_core_virtual_network.mysqlvcn[0].default_dhcp_options_id
   prohibit_public_ip_on_vnic = "true"
   dns_label                  = "mysqlpriv"
