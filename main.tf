@@ -1,9 +1,3 @@
-
-locals {
-  vcn_id = var.existing_vcn_ocid == "" ? oci_core_virtual_network.mysqlvcn[0].id : var.existing_vcn_ocid
-  private_subnet_id = var.existing_private_subnet_ocid == "" ? oci_core_subnet.private[0].id : var.existing_private_subnet_ocid
-}
-
 data "oci_identity_availability_domains" "ad" {
   compartment_id = var.tenancy_ocid
 }
@@ -13,82 +7,213 @@ data "template_file" "ad_names" {
   template = lookup(data.oci_identity_availability_domains.ad.availability_domains[count.index], "name")
 }
 
-
 data "oci_mysql_mysql_configurations" "shape" {
     compartment_id = var.compartment_ocid
     type = ["DEFAULT"]
     shape_name = var.mysql_shape
 }
 
-resource "oci_core_virtual_network" "mysqlvcn" {
-  cidr_block = var.vcn_cidr
+resource oci_core_vcn mds-vcn {
+  cidr_block     = "10.5.0.0/16"
   compartment_id = var.compartment_ocid
-  display_name = var.vcn
-  dns_label = "mysqlvcn"
-
-  count = var.existing_vcn_ocid == "" ? 1 : 0
-}
-
-
-resource "oci_core_nat_gateway" "nat_gateway" {
-  compartment_id = var.compartment_ocid
-  vcn_id = local.vcn_id
-  display_name   = "nat_gateway"
-}
-
-
-resource "oci_core_route_table" "private_route_table" {
-  compartment_id = var.compartment_ocid
-  vcn_id = local.vcn_id
-  display_name   = "RouteTableForMySQLPrivate"
-  route_rules {
-    destination       = "0.0.0.0/0"
-    network_entity_id = oci_core_nat_gateway.nat_gateway.id
+  defined_tags = {
+  }
+  display_name = "mds-vcn"
+  dns_label    = "ocidevcluster"
+  freeform_tags = {
   }
 }
 
-resource "oci_core_security_list" "private_security_list" {
+resource oci_core_internet_gateway mds-igw {
   compartment_id = var.compartment_ocid
-  display_name   = "Private"
-  vcn_id = local.vcn_id
+  defined_tags = {
+  }
+  display_name = "mds-igw"
+  enabled      = "true"
+  freeform_tags = {
+  }
+  vcn_id = oci_core_vcn.mds-vcn.id
+}
+
+resource oci_core_subnet mds-subnet-regional {
+  
+  cidr_block     = "10.5.20.0/24"
+  compartment_id = var.compartment_ocid
+  defined_tags = {
+  }
+  dhcp_options_id = oci_core_vcn.mds-vcn.default_dhcp_options_id
+  display_name    = "mds-subnet-regional"
+  dns_label       = "mdssubnet"
+  freeform_tags = {
+  }
+  
+  prohibit_public_ip_on_vnic = "true"
+  route_table_id             = oci_core_vcn.mds-vcn.default_route_table_id
+  security_list_ids = [
+    oci_core_security_list.mds-seclist.id,
+  ]
+  vcn_id = oci_core_vcn.mds-vcn.id
+}
+
+resource oci_core_subnet operator-subnet-regional {
+  
+  cidr_block     = "10.5.10.0/24"
+  compartment_id = var.compartment_ocid
+  defined_tags = {
+  }
+  dhcp_options_id = oci_core_vcn.mds-vcn.default_dhcp_options_id
+  display_name    = "operator-subnet-regional"
+  dns_label       = "operatorsubnet"
+  freeform_tags = {
+  }
+  
+  prohibit_public_ip_on_vnic = "false"
+  route_table_id             = oci_core_vcn.mds-vcn.default_route_table_id
+  security_list_ids = [
+    oci_core_security_list.operator-seclist.id,
+  ]
+  vcn_id = oci_core_vcn.mds-vcn.id
+}
+
+resource oci_core_default_dhcp_options Default-DHCP-Options-for-mds-vcn {
+  defined_tags = {
+  }
+  display_name = "Default DHCP Options for mds-vcn"
+  freeform_tags = {
+  }
+  manage_default_resource_id = oci_core_vcn.mds-vcn.default_dhcp_options_id
+  options {
+    custom_dns_servers = [
+    ]
+    
+    server_type = "VcnLocalPlusInternet"
+    type        = "DomainNameServer"
+  }
+  options {
+    
+    search_domain_names = [
+      "ocidevcluster.oraclevcn.com",
+    ]
+    
+    type = "SearchDomain"
+  }
+}
+  
+resource oci_core_default_route_table mds-routetable {
+  defined_tags = {
+  }
+  display_name = "mds-routetable"
+  freeform_tags = {
+  }
+  manage_default_resource_id = oci_core_vcn.mds-vcn.default_route_table_id
+  route_rules {
+    
+    destination       = "0.0.0.0/0"
+    destination_type  = "CIDR_BLOCK"
+    network_entity_id = oci_core_internet_gateway.mds-igw.id
+  }
+}
+
+resource oci_core_security_list mds-seclist {
+  compartment_id = var.compartment_ocid
+  defined_tags = {
+  }
+  display_name = "mds-seclist"
 
   egress_security_rules {
-    destination = "0.0.0.0/0"
+    
+    destination      = "0.0.0.0/0"
+    destination_type = "CIDR_BLOCK"
+    
+    protocol  = "all"
+    stateless = "false"
+    
+  }
+  freeform_tags = {
+  }
+  ingress_security_rules {
+    
     protocol    = "all"
+    source      = "10.5.10.0/24"
+    source_type = "CIDR_BLOCK"
+    stateless   = "true"
+    
   }
-  ingress_security_rules  {
-    protocol = "1"
-    source   = var.vcn_cidr
-  }
-  ingress_security_rules  {
-    tcp_options  {
-      max = 3306
-      min = 3306
+  ingress_security_rules {
+    
+    icmp_options {
+      code = "4"
+      type = "3"
     }
-    protocol = "6"
-    source   = var.vcn_cidr
+    protocol    = "1"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    stateless   = "false"
+    
   }
-  ingress_security_rules  {
-    tcp_options  {
-      max = 33061
-      min = 33060
-    }
-    protocol = "6"
-    source   = var.vcn_cidr
-  }
+  vcn_id = oci_core_vcn.mds-vcn.id
 }
 
-resource "oci_core_subnet" "private" {
-  cidr_block                 = cidrsubnet(var.vcn_cidr, 8, 1)
-  display_name               = "mysql_private_subnet"
-  compartment_id             = var.compartment_ocid
-  vcn_id                     = local.vcn_id
-  #dhcp_options_id = var.use_existing_vcn_ocid ? var.existing_vcn_ocid.default_dhcp_options_id : oci_core_virtual_network.mysqlvcn[0].default_dhcp_options_id
-  prohibit_public_ip_on_vnic = "true"
-  dns_label                  = "mysqlpriv"
+resource oci_core_security_list operator-seclist {
+  compartment_id = var.compartment_ocid
+  defined_tags = {
+  }
+  display_name = "operator-seclist"
 
-  count = var.existing_private_subnet_ocid == "" ? 1 : 0
-
+  egress_security_rules {
+    
+    destination      = "0.0.0.0/0"
+    destination_type = "CIDR_BLOCK"
+    
+    protocol  = "all"
+    stateless = "false"
+    
+  }
+  freeform_tags = {
+  }
+  ingress_security_rules {
+    
+    icmp_options {
+      code = "4"
+      type = "3"
+    }
+    protocol    = "1"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    stateless   = "false"
+    
+  }
+  ingress_security_rules {
+    
+    protocol    = "6"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    stateless   = "false"
+    tcp_options {
+      max = "22"
+      min = "22"
+    }    
+  }
+  ingress_security_rules {
+    
+    protocol    = "6"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    stateless   = "false"
+    tcp_options {
+      max = "80"
+      min = "80" 
+    }
+  }  
+  ingress_security_rules {
+    
+    protocol    = "all"
+    source      = "10.5.20.0/24"
+    source_type = "CIDR_BLOCK"
+    stateless   = "true"
+    
+  }
+  vcn_id = oci_core_vcn.mds-vcn.id
 }
 
 module "mds-instance" {
@@ -98,9 +223,8 @@ module "mds-instance" {
   availability_domain = data.template_file.ad_names.*.rendered[0]
   configuration_id = data.oci_mysql_mysql_configurations.shape.configurations[0].id
   compartment_ocid = var.compartment_ocid
-  subnet_id = local.private_subnet_id
+  subnet_id = oci_core_subnet.mds-subnet-regional.id
   display_name = var.mds_instance_name
   deploy_ha = var.deploy_mds_ha
   mysql_shape = var.mysql_shape
 }
-
