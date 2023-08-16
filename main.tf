@@ -14,7 +14,7 @@ data "oci_mysql_mysql_configurations" "shape" {
 }
 
 resource oci_core_vcn mds-vcn {
-  cidr_block     = "10.5.0.0/16"
+  cidr_block     = var.vcn_cidr
   compartment_id = var.compartment_ocid
   defined_tags = {
   }
