@@ -39,3 +39,4 @@ resource "oci_mysql_mysql_configuration" "mds_mysql_configuration" {
 	}
 }
 
+oci_mysql_mysql_db_system.MDSinstance.ip_address
