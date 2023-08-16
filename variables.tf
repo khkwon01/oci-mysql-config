@@ -83,7 +83,7 @@ variable "vcn" {
 
 variable "vcn_cidr" {
   description = "VCN's CIDR IP Block"
-  default     = "10.0.0.0/16"
+  default     = "10.5.0.0/16"
 }
 
 variable "fingerprint" {
