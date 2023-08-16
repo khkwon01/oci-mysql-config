@@ -96,10 +96,6 @@ variable "dns_label" {
   default     = ""
 }
 
-variable "label_prefix" {
-  description = "To create unique identifier for multiple setup in a compartment."
-  default     = ""
-}
 
 variable "admin_password" {
   description = "Password for the admin user for MySQL Database Service"
