@@ -146,15 +146,3 @@ variable "deploy_mds_ha" {
   type        = bool
   default     = false
 }
-
-
-variable "deploy_mds_heatwave" {
-  description = "Deploy HeatWave Cluster"
-  type        = bool
-  default     = false
-}
-
-variable "heatwave_cluster_size" {
-  description = "MySQL HeatWave Cluster Size"
-  default     = 1
-}
