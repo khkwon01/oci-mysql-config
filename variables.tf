@@ -124,6 +124,7 @@ variable "label_prefix" {
 
 variable "admin_password" {
   description = "Password for the admin user for MySQL Database Service"
+  default = "Welcome#1"
 }
 
 variable "admin_username" {
@@ -132,7 +133,7 @@ variable "admin_username" {
 }
 
 variable "mysql_shape" {
-    default = "MySQL.HeatWave.VM.Standard.E3"
+    default = "MySQL.VM.Standard.E3.2.32GB"
 }
 
 
