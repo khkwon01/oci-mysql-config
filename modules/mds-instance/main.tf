@@ -38,5 +38,3 @@ resource "oci_mysql_mysql_configuration" "mds_mysql_configuration" {
                 binlog_expire_logs_seconds = "86400"
 	}
 }
-
-oci_mysql_mysql_db_system.MDSinstance.ip_address
