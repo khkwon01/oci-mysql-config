@@ -48,18 +48,3 @@ variable "deploy_ha" {
   description = "Use HA for MDS"
   default = false
 }
-
-variable "deploy_heatwave" {
-  description = "Enable HeatWave Cluster for MDS"
-  default = false
-}
-
-variable "heatwave_cluster_size" {
-   default = 2
-   description = "MySQL HeatWave Cluster Size"
-}
-
-variable "heatwave_cluster_shape" {
-   default = "MySQL.HeatWave.VM.Standard.E3"
-   description = "MySQL HeatWave Cluster Shape"
-}
