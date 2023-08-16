@@ -9,6 +9,7 @@ variable "user_ocid" {
 
 variable "compartment_ocid" {
   description = "Compartment's OCID where VCN will be created. "
+  default = ""
 }
 
 variable "region" {
