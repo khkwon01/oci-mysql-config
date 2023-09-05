@@ -37,7 +37,7 @@ variable "admin_username" {
 }
 
 variable "mysql_shape" {
-    default = "MySQL.VM.Standard.E3.2.32GB"
+    default = "MySQL.VM.Standard.E4.2.32GB"
 }
 
 
